@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOC 歷史百貨公司 | 福爾摩沙旗艦店</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .mall-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .neon-text {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- 內建 Icon 元件 (移除外部依賴以修復錯誤) ---
+        const IconBase = ({ children, size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {children}
+            </svg>
+        );
+
+        const Anchor = (p) => <IconBase {...p}><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></IconBase>;
+        const DollarSign = (p) => <IconBase {...p}><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></IconBase>;
+        const Coffee = (p) => <IconBase {...p}><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></IconBase>;
+        const Landmark = (p) => <IconBase {...p}><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></IconBase>;
+        const Ticket = (p) => <IconBase {...p}><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></IconBase>;
+        const MapPin = (p) => <IconBase {...p}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></IconBase>;
+        const ArrowRight = (p) => <IconBase {...p}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></IconBase>;
+        const User = (p) => <IconBase {...p}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></IconBase>;
+        const Ship = (p) => <IconBase {...p}><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1 .6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.9 5.8 2.38 8"/><path d="M12 10V4"/></IconBase>;
+        const Info = (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></IconBase>;
+        const Star = (p) => <IconBase {...p}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></IconBase>;
+        const Swords = (p) => <IconBase {...p}><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/></IconBase>;
+        const ScrollText = (p) => <IconBase {...p}><path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/></IconBase>;
+        // ShoppingBag (雖未顯示但在 code 中有引用，加上以防萬一)
+        const ShoppingBag = (p) => <IconBase {...p}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></IconBase>;
+
+        // Components
+        
+        // Navigation / Directory
+        const Directory = ({ currentFloor, setFloor }) => {
+            const floors = [
+                { id: 'intro', label: '1F 中庭廣場', icon: <Anchor size={18} />, desc: '1624 盛大開幕' },
+                { id: 'trade', label: '2F 國際精品', icon: <DollarSign size={18} />, desc: '鹿皮/轉口貿易' },
+                { id: 'life', label: '4F 美食街', icon: <Coffee size={18} />, desc: '引進物種與農業' },
+                { id: 'gov', label: '7F 舊金山大街', icon: <Landmark size={18} />, desc: '城堡與統治' },
+                { id: 'war', label: '8F 威秀影城', icon: <Ticket size={18} />, desc: '鄭荷之戰' },
+            ];
+
+            return (
+                <div className="fixed left-0 top-0 h-full w-20 md:w-64 bg-slate-900 text-white flex flex-col z-50 shadow-2xl transition-all duration-300">
+                    <div className="p-4 md:p-6 border-b border-slate-700 flex items-center justify-center md:justify-start gap-2">
+                        <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center font-bold text-white">V</div>
+                        <h1 className="hidden md:block text-xl font-bold tracking-wider">VOC<br/><span className="text-xs font-normal text-orange-400">福爾摩沙旗艦店</span></h1>
+                    </div>
+                    
+                    <nav className="flex-1 overflow-y-auto py-4">
+                        {floors.map((floor) => (
+                            <button
+                                key={floor.id}
+                                onClick={() => setFloor(floor.id)}
+                                className={`w-full p-4 flex items-center gap-4 transition-all duration-200 border-l-4 ${currentFloor === floor.id ? 'border-orange-500 bg-slate-800 text-orange-400' : 'border-transparent hover:bg-slate-800 text-gray-400'}`}
+                            >
+                                <div className="min-w-[20px]">{floor.icon}</div>
+                                <div className="hidden md:block text-left">
+                                    <div className="font-bold">{floor.label}</div>
+                                    <div className="text-xs opacity-70">{floor.desc}</div>
+                                </div>
+                            </button>
+                        ))}
+                    </nav>
+
+                    <div className="p-4 border-t border-slate-700 hidden md:block">
+                        <div className="bg-slate-800 rounded-lg p-3 text-xs text-gray-400">
+                            <p className="font-bold text-white mb-1">客服中心</p>
+                            <p>大員長官公署</p>
+                            <p>營業時間: 1624-1662</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 1F: Introduction
+        const IntroFloor = ({ onNext }) => (
+            <div className="animate-fade-in space-y-8">
+                <div className="relative h-[400px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-blue-900 to-slate-800 text-white flex items-center justify-center p-8">
+                    <div className="absolute inset-0 opacity-20 bg-[url('https://www.svgrepo.com/show/376356/water-waves.svg')] bg-repeat"></div>
+                    <div className="relative z-10 text-center max-w-2xl">
+                        <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-bold tracking-wider mb-4 inline-block">GRAND OPENING 1624</span>
+                        <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight">VOC<br/>荷蘭東印度公司</h1>
+                        <p className="text-lg md:text-xl text-gray-300 mb-8 font-light">
+                            歡迎光臨全台第一家國際連鎖百貨！<br/>
+                            來自阿姆斯特丹的頂級服務，連結全世界的海洋貿易網。
+                        </p>
+                        <button onClick={onNext} className="bg-white text-blue-900 px-8 py-3 rounded-full font-bold hover:bg-orange-400 hover:text-white transition-colors flex items-center gap-2 mx-auto">
+                            開始逛街 <ArrowRight size={20} />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4"><MapPin /></div>
+                        <h3 className="text-xl font-bold mb-2">黃金地段</h3>
+                        <p className="text-gray-600">選址於「大員」（今台南安平），擁有絕佳的沙洲地形，是控制東亞貿易航線的絕佳櫃位。</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-4"><User /></div>
+                        <h3 className="text-xl font-bold mb-2">會員制度</h3>
+                        <p className="text-gray-600">原住民、漢人皆納入管理系統。首創「人頭稅」會員費機制，並定期召開「地方會議」。</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4"><Ship /></div>
+                        <h3 className="text-xl font-bold mb-2">獨家物流</h3>
+                        <p className="text-gray-600">擁有全世界最強大的武裝商船隊，確保您的貨物從巴達維亞直送日本長崎。</p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // 2F: Trade
+        const TradeFloor = () => {
+            const products = [
+                { name: "台灣梅花鹿皮", price: "出口日本 No.1", tag: "熱銷冠軍", desc: "武士盔甲內襯指定用料，年出口達十萬張。", icon: "🦌" },
+                { name: "頂級蔗糖", price: "出口波斯/歐洲", tag: "甜蜜商機", desc: "荷蘭人引進耕牛與技術，將台灣變成產糖王國。", icon: "🍬" },
+                { name: "轉口絲綢", price: "來自中國", tag: "精選選物", desc: "VOC 擔任中介，將中國生絲轉賣至日本賺取暴利。", icon: "👘" },
+                { name: "硫磺", price: "來自北投", tag: "軍工限定", desc: "北部探勘挖掘，重要的戰略物資。", icon: "🌋" }
+            ];
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-end mb-4 border-b-2 border-gray-200 pb-4">
+                        <div>
+                            <h2 className="text-3xl font-bold text-slate-800">2F 國際精品館</h2>
+                            <p className="text-gray-500">Global Trade Collection</p>
+                        </div>
+                        <span className="bg-slate-800 text-white px-3 py-1 text-sm rounded">全館滿千送硫磺</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {products.map((item, idx) => (
+                            <div key={idx} className="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="h-40 bg-slate-100 flex items-center justify-center text-6xl group-hover:scale-110 transition-transform duration-300">
+                                    {item.icon}
+                                </div>
+                                <div className="p-5">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-xs font-bold text-orange-500 border border-orange-200 px-2 py-0.5 rounded bg-orange-50">{item.tag}</span>
+                                    </div>
+                                    <h3 className="text-lg font-bold mb-1">{item.name}</h3>
+                                    <p className="text-sm font-semibold text-blue-600 mb-2">{item.price}</p>
+                                    <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                                    <button className="mt-4 w-full bg-slate-900 text-white py-2 rounded font-medium text-sm hover:bg-orange-500 transition-colors">
+                                        加入貿易清單
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-xl mt-8">
+                        <h4 className="font-bold text-blue-900 flex items-center gap-2">
+                            <Info size={20}/> 樓管廣播
+                        </h4>
+                        <p className="text-blue-800 mt-2 text-sm">
+                            親愛的顧客您好，本樓層實施「郭懷一事件」後加強安檢。
+                            當年漢人農民因不滿荷蘭人的重稅與打壓，爆發了大規模抗爭，這是您在享受購物時不可不知的歷史背景。
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        // 4F: Lifestyle & Food
+        const FoodFloor = () => (
+            <div className="space-y-6">
+                 <div className="flex justify-between items-end mb-4 border-b-2 border-gray-200 pb-4">
+                    <div>
+                        <h2 className="text-3xl font-bold text-slate-800">4F 異國美食街</h2>
+                        <p className="text-gray-500">Exotic Food Court & Agriculture</p>
+                    </div>
+                    <span className="text-orange-600 font-bold">新櫃登場！</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Menu Item 1 */}
+                    <div className="bg-white rounded-2xl p-6 shadow-md border-t-8 border-green-500 relative overflow-hidden">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-green-100 rounded-full opacity-50"></div>
+                        <h3 className="text-2xl font-bold mb-1">荷蘭豆</h3>
+                        <p className="text-xs text-gray-400 mb-4">Peas / Snow Peas</p>
+                        <p className="text-gray-600 mb-4">
+                            原本是荷蘭人帶來的豆子，現在已經是台灣餐桌上的家常菜。您在熱炒店吃到的豆子，可能就是 300 年前的舶來品喔！
+                        </p>
+                        <div className="flex items-center gap-2 text-sm font-bold text-green-700">
+                            <Star size={16} fill="currentColor" /> 推薦指數：5顆星
+                        </div>
+                    </div>
+
+                    {/* Menu Item 2 */}
+                    <div className="bg-white rounded-2xl p-6 shadow-md border-t-8 border-yellow-500 relative overflow-hidden">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-yellow-100 rounded-full opacity-50"></div>
+                        <h3 className="text-2xl font-bold mb-1">芒果</h3>
+                        <p className="text-xs text-gray-400 mb-4">Mango</p>
+                        <p className="text-gray-600 mb-4">
+                            荷蘭人從東南亞殖民地引進的品種（土芒果），在台灣落地生根。沒有荷蘭人，可能就沒有現在的芒果冰了！
+                        </p>
+                         <div className="flex items-center gap-2 text-sm font-bold text-yellow-700">
+                            <Star size={16} fill="currentColor" /> 必點招牌
+                        </div>
+                    </div>
+
+                     {/* Menu Item 3 */}
+                    <div className="bg-white rounded-2xl p-6 shadow-md border-t-8 border-red-800 relative overflow-hidden">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-red-100 rounded-full opacity-50"></div>
+                        <h3 className="text-2xl font-bold mb-1">台灣黃牛</h3>
+                        <p className="text-xs text-gray-400 mb-4">Cattle</p>
+                        <p className="text-gray-600 mb-4">
+                            為了開墾種植蔗糖，荷蘭人從印度引進了黃牛，改變了台灣原本只有狩獵的生活型態，進入了農耕社會。
+                        </p>
+                         <div className="flex items-center gap-2 text-sm font-bold text-red-900">
+                            <Star size={16} fill="currentColor" /> 農業基石
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-8 bg-orange-50 rounded-xl p-8 flex flex-col md:flex-row items-center gap-6">
+                    <div className="flex-1">
+                        <h3 className="text-2xl font-bold text-orange-900 mb-2">限時特展：新港文書</h3>
+                        <p className="text-gray-700 mb-4">
+                            荷蘭宣教士為了傳教，使用羅馬拼音拼寫西拉雅語（原住民語言），創立了台灣第一套文字系統！
+                            這可是當時的「補習班」教材，甚至在荷蘭人離開後，原住民還繼續使用了一百多年來簽訂地契（番仔契）。
+                        </p>
+                        <button className="bg-orange-600 text-white px-6 py-2 rounded-full text-sm hover:bg-orange-700 transition">
+                            查看契約範本
+                        </button>
+                    </div>
+                    <div className="w-full md:w-1/3 h-40 bg-white rounded-lg shadow-inner flex items-center justify-center border-2 border-orange-200 border-dashed">
+                        <div className="text-center">
+                            <ScrollText size={48} className="mx-auto text-gray-400 mb-2" />
+                            <span className="text-gray-400 font-serif italic">Sinkan Manuscripts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // 7F: Architecture
+        const GovFloor = () => (
+             <div className="space-y-6">
+                 <div className="flex justify-between items-end mb-4 border-b-2 border-gray-200 pb-4">
+                    <div>
+                        <h2 className="text-3xl font-bold text-slate-800">7F 舊金山主題大街</h2>
+                        <p className="text-gray-500">Fort Zeelandia & Architecture</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Fort Zeelandia */}
+                    <div className="relative group overflow-hidden rounded-3xl shadow-xl h-80">
+                        <div className="absolute inset-0 bg-red-900"></div>
+                         <div className="absolute inset-0 bg-[url('https://www.svgrepo.com/show/483607/brick-wall.svg')] opacity-10 bg-repeat"></div>
+                        <div className="absolute inset-0 p-8 flex flex-col justify-end text-white bg-gradient-to-t from-black/80 to-transparent">
+                            <div className="bg-red-600 w-fit px-3 py-1 rounded text-xs font-bold mb-2">核心地標</div>
+                            <h3 className="text-3xl font-bold mb-2">熱蘭遮城 (Zeelandia)</h3>
+                            <p className="text-gray-200 text-sm">
+                                位於安平（大員），是 VOC 的行政中心與軍事堡壘。使用紅磚興建，層層防衛。現在的安平古堡還留有當時的殘跡喔！
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Fort Provintia */}
+                    <div className="relative group overflow-hidden rounded-3xl shadow-xl h-80">
+                        <div className="absolute inset-0 bg-slate-700"></div>
+                        <div className="absolute inset-0 p-8 flex flex-col justify-end text-white bg-gradient-to-t from-black/80 to-transparent">
+                            <div className="bg-blue-500 w-fit px-3 py-1 rounded text-xs font-bold mb-2">商務中心</div>
+                            <h3 className="text-3xl font-bold mb-2">普羅民遮城 (Provintia)</h3>
+                            <p className="text-gray-200 text-sm">
+                                位於赤崁（台南市區），主要是商業行政中心與漢人聚落。後來變成知名的「赤崁樓」。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm mt-6">
+                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Landmark/> 建築小知識</h3>
+                    <ul className="space-y-3 text-gray-600">
+                        <li className="flex items-start gap-3">
+                            <span className="bg-gray-200 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <span><b>紅毛土：</b>荷蘭人引進了水泥技術（糯米+糖漿+蚵殼灰），堅固耐用，讓城堡屹立不搖。</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <span className="bg-gray-200 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <span><b>熱蘭遮城市鎮：</b>不只有城堡，周邊還發展出了棋盤式的街道市鎮，這可是台灣最早的都市計畫之一！</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        );
+
+        // 8F: Cinema / War
+        const WarFloor = () => (
+            <div className="space-y-6">
+                <div className="flex justify-between items-end mb-4 border-b-2 border-gray-200 pb-4">
+                    <div>
+                        <h2 className="text-3xl font-bold text-slate-800">8F 歷史威秀影城</h2>
+                        <p className="text-gray-500">The Siege of Fort Zeelandia (1661-1662)</p>
+                    </div>
+                    <span className="bg-red-600 text-white px-4 py-1 rounded animate-pulse text-sm font-bold">現正熱映中</span>
+                </div>
+
+                <div className="bg-black rounded-3xl overflow-hidden shadow-2xl relative text-white">
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-900/50 to-blue-900/50"></div>
+                    
+                    <div className="relative z-10 p-8 md:p-16 text-center">
+                        <div className="flex justify-center gap-4 mb-6">
+                             <Swords size={64} className="text-red-500" />
+                        </div>
+                        <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500">
+                            鄭荷大戰
+                        </h1>
+                        <p className="text-xl md:text-2xl font-light mb-8 text-gray-300">
+                            經營權易主！為期 9 個月的圍城商戰
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left max-w-4xl mx-auto bg-white/10 backdrop-blur-sm p-6 rounded-xl">
+                            <div>
+                                <h3 className="text-red-400 font-bold text-lg mb-2">攻方：國姓爺集團 (Koxinga)</h3>
+                                <p className="text-sm text-gray-300">
+                                    鄭成功率領 25,000 大軍、400 艘戰船。<br/>
+                                    <b>策略：</b> 切斷水源、長期圍困、佔領普羅民遮城。
+                                </p>
+                            </div>
+                            <div>
+                                <h3 className="text-blue-400 font-bold text-lg mb-2">守方：VOC 台灣分公司 (Coyett)</h3>
+                                <p className="text-sm text-gray-300">
+                                    末代長官 揆一 (Frederick Coyett)。<br/>
+                                    孤立無援，等待巴達維亞總部救援未果。<br/>
+                                    <b>結局：</b> 1662 年 2 月 1 日，雙方簽訂條約，荷蘭人撤離。
+                                </p>
+                            </div>
+                        </div>
+
+                         <div className="mt-8">
+                             <p className="text-xs text-gray-500 uppercase tracking-[0.3em] mb-2">Coming Soon</p>
+                             <h4 className="text-lg font-bold">續集預告：明鄭時期的開發</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-yellow-50 p-6 rounded-xl border border-yellow-200">
+                    <h3 className="font-bold text-yellow-800 mb-2">🎬 影評人觀點：歷史的轉折點</h3>
+                    <p className="text-sm text-yellow-900">
+                        這場戰爭結束了荷蘭在台灣 38 年的統治，台灣正式進入漢人政權統治時期。
+                        雖然荷蘭人離開了，但他們留下的黃牛、芒果、波克比（誤，是撲克牌...其實荷蘭人也愛賭博）、以及面向海洋的貿易視野，都深深影響了台灣。
+                    </p>
+                </div>
+            </div>
+        );
+
+        const App = () => {
+            const [currentFloor, setFloor] = useState('intro');
+
+            const renderContent = () => {
+                switch(currentFloor) {
+                    case 'intro': return <IntroFloor onNext={() => setFloor('trade')} />;
+                    case 'trade': return <TradeFloor />;
+                    case 'life': return <FoodFloor />;
+                    case 'gov': return <GovFloor />;
+                    case 'war': return <WarFloor />;
+                    default: return <IntroFloor />;
+                }
+            };
+
+            return (
+                <div className="flex min-h-screen bg-gray-50">
+                    <Directory currentFloor={currentFloor} setFloor={setFloor} />
+                    
+                    <main className="flex-1 ml-20 md:ml-64 p-4 md:p-10 transition-all">
+                        <header className="mb-8 flex justify-between items-center">
+                            <div className="md:hidden font-bold text-xl text-slate-800">VOC Mall</div>
+                            <div className="text-xs text-gray-400 ml-auto">
+                                歷史定位：1624 - 1662 | 所在樓層：
+                                <span className="font-bold text-orange-500 ml-1 uppercase">{currentFloor}</span>
+                            </div>
+                        </header>
+
+                        {/* Main Content Area */}
+                        <div className="max-w-6xl mx-auto min-h-[80vh]">
+                            {renderContent()}
+                        </div>
+
+                        <footer className="mt-20 pt-10 border-t border-gray-200 text-center text-gray-400 text-sm">
+                            <p>© 2024 Big City History Mall Project. 歷史內容僅供教學趣味使用。</p>
+                            <p className="mt-2 text-xs">Based on the history of Dutch Formosa.</p>
+                        </footer>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
